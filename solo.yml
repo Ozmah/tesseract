@@ -1,0 +1,83 @@
+name: Tesseract
+icon_initials: TS
+
+processes:
+  Environment up:
+    command: bun run env:up
+    auto_start: false
+    auto_restart: false
+
+  Environment down:
+    command: bun run env:down
+    auto_start: false
+    auto_restart: false
+
+  Environment logs:
+    command: bun run env:logs
+    auto_start: false
+    auto_restart: false
+
+  Dev — Vite:
+    command: bun run dev
+    auto_start: false
+    auto_restart: false
+
+  Prepare / rebuild:
+    command: bun run docker:prepare
+    auto_start: false
+    auto_restart: false
+
+  Glados:
+    command: bun run glados
+    auto_start: false
+    auto_restart: false
+
+  Shodan:
+    command: bun run shodan
+    auto_start: false
+    auto_restart: false
+
+  Browser tests:
+    command: bun run test:browser
+    auto_start: false
+    auto_restart: false
+
+  Format, fix and test:
+    command: bun run check
+    auto_start: false
+    auto_restart: false
+
+  Typecheck:
+    command: bun run check-types
+    auto_start: false
+    auto_restart: false
+
+  Build:
+    command: bun run build
+    auto_start: false
+    auto_restart: false
+
+  Generate routes:
+    command: bun run routes:generate
+    auto_start: false
+    auto_restart: false
+
+  Unlock Doppler token:
+    command: bun run env:unlock
+    auto_start: false
+    auto_restart: false
+
+  Environment check:
+    command: bun run env:check
+    auto_start: false
+    auto_restart: false
+
+  Environment tests:
+    command: bun run env:test
+    auto_start: false
+    auto_restart: false
+
+  Secrets scan:
+    command: bun run secrets:scan
+    auto_start: false
+    auto_restart: false

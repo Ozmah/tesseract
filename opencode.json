@@ -5,6 +5,13 @@
             "type": "local",
             "enabled": true,
             "command": [
+                "docker",
+                "compose",
+                "exec",
+                "-T",
+                "app",
+                "sh",
+                "/app/docker-entrypoint.sh",
                 "php",
                 "artisan",
                 "boost:mcp"

@@ -12,6 +12,9 @@
 /vendor
 .DS_Store
 .env
+.env.local
+.env.*.local
+.varlock*
 .env.backup
 .env.production
 .phpactor.json

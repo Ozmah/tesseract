@@ -1,0 +1,49 @@
+services:
+  app:
+    image: tesseract-development:local
+    build: &development_build
+      context: .
+      target: development
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      DOPPLER_TOKEN: ${DOPPLER_TOKEN:-}
+    volumes:
+      - .:/app
+      - app_storage:/app/storage
+      - app_data:/app-data
+      - caddy_data:/data
+      - caddy_config:/config
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # Short-lived development commands, with no Doppler token or runtime volumes.
+  tools:
+    profiles: [tools]
+    image: tesseract-development:local
+    build: *development_build
+    init: true
+    entrypoint: []
+    command: ["bun", "run", "shodan:ci"]
+    environment:
+      APP_ENV: testing
+      TINI_KILL_PROCESS_GROUP: "1"
+    volumes:
+      - .:/app
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      disable: true
+
+volumes:
+  app_storage:
+  app_data:
+  caddy_data:
+  caddy_config:

@@ -4,6 +4,16 @@ declare(strict_types=1);
 
 use App\Models\User;
 
+it('redirects the settings entry to the profile page', function (): void {
+    $this->actingAs(User::factory()->create())
+        ->get('/settings')
+        ->assertRedirectToRoute('user-profile.edit');
+});
+
+it('requires authentication for the settings redirect', function (): void {
+    $this->get('/settings')->assertRedirectToRoute('login');
+});
+
 it('renders profile edit page', function (): void {
     $user = User::factory()->create();
 

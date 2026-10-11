@@ -6,7 +6,7 @@ import laravel from 'laravel-vite-plugin';
 import {bunny} from 'laravel-vite-plugin/fonts';
 import {defineConfig} from 'vite-plus';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     lint: {
         options: {
             typeAware: true,
@@ -53,6 +53,10 @@ export default defineConfig({
         ],
     },
     server: {
+        origin: 'http://localhost:5173',
+        cors: {
+            origin: ['http://localhost:8000', 'http://127.0.0.1:8000'],
+        },
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },
@@ -75,6 +79,9 @@ export default defineConfig({
         tailwindcss(),
         wayfinder({
             formVariants: true,
+            command: command === 'serve'
+                ? 'docker compose run --rm --no-deps -T tools php artisan wayfinder:generate'
+                : 'php artisan wayfinder:generate',
         }),
     ],
-});
+}));
