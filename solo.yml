@@ -72,6 +72,16 @@ processes:
     auto_start: false
     auto_restart: false
 
+  Unlock MediaMTX credentials:
+    command: bun run env:unlock:media
+    auto_start: false
+    auto_restart: false
+
+  MediaMTX environment check:
+    command: bun run env:check:media
+    auto_start: false
+    auto_restart: false
+
   Environment tests:
     command: bun run env:test
     auto_start: false

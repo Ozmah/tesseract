@@ -1,0 +1,49 @@
+logLevel: info
+logDestinations: [stdout]
+
+api: false
+metrics: false
+pprof: false
+playback: false
+rtmp: false
+webrtc: true
+webrtcAllowOrigins: ['http://localhost:8000', 'http://127.0.0.1:8000']
+webrtcIPsFromInterfaces: false
+webrtcAdditionalHosts: ['127.0.0.1']
+webrtcLocalUDPAddress: :8189
+srt: false
+moq: false
+
+authMethod: internal
+authInternalUsers:
+  - user: any
+    permissions:
+      - action: read
+        path: tars
+      - action: read
+        path: tars-sub
+      - action: read
+        path: case
+      - action: read
+        path: case-sub
+
+rtsp: true
+rtspTransports: [tcp]
+
+hls: true
+hlsAllowOrigins: ['http://localhost:8000', 'http://127.0.0.1:8000']
+hlsVariant: fmp4
+hlsSegmentDuration: 2s
+hlsSegmentCount: 6
+
+pathDefaults:
+  rtspTransport: tcp
+  sourceOnDemand: true
+  record: false
+
+# Sources are supplied through MTX_PATHS_*_SOURCE, never stored in this file.
+paths:
+  tars: {}
+  tars-sub: {}
+  case: {}
+  case-sub: {}

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 return [
 
+    'mediamtx' => [
+        'webrtc_url' => env('MEDIA_WEBRTC_URL', 'http://localhost:8889'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

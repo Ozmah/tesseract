@@ -15,7 +15,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('viewer'))->name('home');
+Route::get('/', fn () => Inertia::render('viewer', [
+    'mediaUrl' => config('services.mediamtx.webrtc_url'),
+]))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');

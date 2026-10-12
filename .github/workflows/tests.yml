@@ -67,6 +67,9 @@ jobs:
       - name: Test environment contract without Doppler credentials
         run: bun run env:test
 
+      - name: Test WebRTC client without camera access
+        run: bun run test:player
+
       - name: Build Assets
         run: bun run build:assets
 

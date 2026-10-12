@@ -6,6 +6,13 @@ import { join, resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '../..');
 const token = 'dp.st.tesseract-contract-test-not-a-real-token';
 const appKey = `base64:${Buffer.alloc(32, 1).toString('base64')}`;
+const mediaToken = 'dp.st.tesseract-media-test-not-a-real-token';
+const cameraUrls = {
+    TESSERACT_CAMERA_TARS_RTSP_MAIN_URL: 'rtsp://test-user:test-pass@192.0.2.10/main',
+    TESSERACT_CAMERA_TARS_RTSP_SUB_URL: 'rtsp://test-user:test-pass@192.0.2.10/sub',
+    TESSERACT_CAMERA_CASE_RTSP_MAIN_URL: 'rtsp://test-user:test-pass@192.0.2.11/main',
+    TESSERACT_CAMERA_CASE_RTSP_SUB_URL: 'rtsp://test-user:test-pass@192.0.2.11/sub',
+};
 let fixture: string;
 
 beforeAll(async () => {
@@ -13,10 +20,11 @@ beforeAll(async () => {
     await mkdir(temporaryRoot, { recursive: true });
     fixture = await mkdtemp(join(temporaryRoot, 'tesseract-env-'));
     await symlink(join(root, 'node_modules'), join(fixture, 'node_modules'));
-    for (const file of ['.env.schema', '.env.bootstrap.schema']) {
+    for (const file of ['.env.schema', '.env.bootstrap.schema', '.env.media.schema']) {
         await writeFile(join(fixture, file), await readFile(join(root, file)));
     }
     await writeFile(join(fixture, '.env.local'), `DOPPLER_TOKEN=${token}\nAPP_KEY=must-not-be-imported\n`);
+    await writeFile(join(fixture, '.env.media.local'), `DOPPLER_MEDIA_TOKEN=${mediaToken}\nAPP_KEY=must-not-be-imported\n`);
     await writeFile(join(fixture, '.env'), 'APP_KEY=must-not-be-loaded\n');
     await writeFile(join(fixture, 'mock-doppler.mjs'), `
 globalThis.fetch = async (input, options) => {
@@ -27,7 +35,8 @@ globalThis.fetch = async (input, options) => {
         url.pathname !== '/v3/configs/config/secrets' ||
         url.searchParams.get('project') !== 'tesseract' ||
         url.searchParams.get('config') !== process.env.CONTRACT_ENV ||
-        request.headers.get('authorization') !== 'Bearer ${token}') {
+        request.headers.get('authorization') !== 'Bearer ' +
+            (process.env.CONTRACT_ENV === 'media-local' ? '${mediaToken}' : '${token}')) {
         throw new Error('Unexpected network request');
     }
     const values = {
@@ -35,8 +44,11 @@ globalThis.fetch = async (input, options) => {
         APP_ENV: 'untrusted',
         DOPPLER_TOKEN: 'untrusted-remote-token',
         UNDECLARED_SECRET: 'must-not-be-injected',
+        ...${JSON.stringify(cameraUrls)},
     };
     if (process.env.CONTRACT_MISSING_KEY) delete values.APP_KEY;
+    if (process.env.CONTRACT_MISSING_STREAM) delete values[process.env.CONTRACT_MISSING_STREAM];
+    if (process.env.CONTRACT_INVALID_STREAM) values.TESSERACT_CAMERA_TARS_RTSP_MAIN_URL = 'https://example.com/main';
     return Response.json({ secrets: Object.fromEntries(
         Object.entries(values).map(([key, value]) => [key, { computed: value }])
     ) });
@@ -50,13 +62,13 @@ afterAll(async () => {
 
 async function cli(
     args: string[],
-    options: { bootstrap?: boolean; appEnv?: string; missingKey?: boolean; missingToken?: boolean; offline?: boolean } = {},
+    options: { bootstrap?: boolean; media?: boolean; appEnv?: string; missingKey?: boolean; missingToken?: boolean; missingStream?: string; invalidStream?: boolean; offline?: boolean } = {},
 ) {
     const appEnv = options.appEnv ?? 'local';
     const child = Bun.spawn([
         process.execPath, '--no-env-file', '--preload', join(fixture, 'mock-doppler.mjs'),
         join(root, 'node_modules/varlock/bin/cli.js'), args[0]!,
-        '--path', join(fixture, options.bootstrap ? '.env.bootstrap.schema' : '.env.schema'),
+        '--path', join(fixture, options.media ? '.env.media.schema' : options.bootstrap ? '.env.bootstrap.schema' : '.env.schema'),
         ...args.slice(1),
     ], {
         cwd: fixture,
@@ -64,10 +76,12 @@ async function cli(
             PATH: process.env.PATH,
             HOME: fixture,
             APP_ENV: appEnv,
-            CONTRACT_ENV: appEnv,
-            ...(!options.bootstrap && !options.missingToken ? { DOPPLER_TOKEN: token } : {}),
+            CONTRACT_ENV: options.media ? 'media-local' : appEnv,
+            ...(!options.bootstrap && !options.media && !options.missingToken ? { DOPPLER_TOKEN: token } : {}),
             ...(options.missingKey ? { CONTRACT_MISSING_KEY: '1' } : {}),
             ...(options.offline ? { CONTRACT_OFFLINE: '1' } : {}),
+            ...(options.missingStream ? { CONTRACT_MISSING_STREAM: options.missingStream } : {}),
+            ...(options.invalidStream ? { CONTRACT_INVALID_STREAM: '1' } : {}),
         },
         stdout: 'pipe',
         stderr: 'pipe',
@@ -129,6 +143,52 @@ console.log(JSON.stringify({
         expect(JSON.parse(result.stdout)).toEqual({
             keyMatches: true, hasToken: false, hasMetadata: false, hasUnknown: false,
         });
+    });
+});
+
+describe('Doppler MediaMTX contract', () => {
+    test('loads media-local and redacts camera URLs and the service token', async () => {
+        const result = await cli(['load', '--agent'], { media: true });
+        expect(result.exitCode).toBe(0);
+        const env = JSON.parse(result.stdout);
+        expect(env.APP_KEY).toBeUndefined();
+        expect(env.UNDECLARED_SECRET).toBeUndefined();
+        expect(result.stdout + result.stderr).not.toContain(mediaToken);
+        for (const url of Object.values(cameraUrls)) {
+            expect(result.stdout + result.stderr).not.toContain(url);
+        }
+    });
+
+    test('injects the four sources without either Doppler token or Laravel secrets', async () => {
+        const result = await cli(['run', '--inject', 'vars', '--', process.execPath, '--no-env-file', '-e', `
+const expected = ${JSON.stringify(cameraUrls)};
+console.log(JSON.stringify({
+    sourcesMatch: Object.entries(expected).every(([key, value]) => process.env[key] === value),
+    hasMediaToken: 'DOPPLER_MEDIA_TOKEN' in process.env,
+    hasAppKey: 'APP_KEY' in process.env,
+    hasAppToken: 'DOPPLER_TOKEN' in process.env,
+    hasUnknown: 'UNDECLARED_SECRET' in process.env,
+    hasMetadata: '__VARLOCK_ENV' in process.env,
+}));`], { media: true });
+        expect(result.exitCode).toBe(0);
+        expect(JSON.parse(result.stdout)).toEqual({
+            sourcesMatch: true, hasMediaToken: false, hasAppKey: false,
+            hasAppToken: false, hasUnknown: false, hasMetadata: false,
+        });
+    });
+
+    for (const key of Object.keys(cameraUrls)) {
+        test(`fails closed when ${key} is missing`, async () => {
+            expect((await cli(['load', '--agent'], { media: true, missingStream: key })).exitCode).not.toBe(0);
+        });
+    }
+
+    test('rejects camera sources that are not RTSP URLs', async () => {
+        expect((await cli(['load', '--agent'], { media: true, invalidStream: true })).exitCode).not.toBe(0);
+    });
+
+    test('fails closed when the media-local config cannot be fetched', async () => {
+        expect((await cli(['load', '--agent'], { media: true, offline: true })).exitCode).not.toBe(0);
     });
 });
 

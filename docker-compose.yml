@@ -22,6 +22,28 @@ services:
     cap_drop:
       - ALL
 
+  mediamtx:
+    image: bluenviron/mediamtx:1.21.2
+    restart: unless-stopped
+    user: "1000:1000"
+    read_only: true
+    ports:
+      - "127.0.0.1:8554:8554"
+      - "127.0.0.1:8888:8888"
+      - "127.0.0.1:8889:8889"
+      - "127.0.0.1:8189:8189/udp"
+    environment:
+      MTX_PATHS_TARS_SOURCE: ${TESSERACT_CAMERA_TARS_RTSP_MAIN_URL:-}
+      MTX_PATHS_TARS-SUB_SOURCE: ${TESSERACT_CAMERA_TARS_RTSP_SUB_URL:-}
+      MTX_PATHS_CASE_SOURCE: ${TESSERACT_CAMERA_CASE_RTSP_MAIN_URL:-}
+      MTX_PATHS_CASE-SUB_SOURCE: ${TESSERACT_CAMERA_CASE_RTSP_SUB_URL:-}
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml:ro
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
   # Short-lived development commands, with no Doppler token or runtime volumes.
   tools:
     profiles: [tools]
