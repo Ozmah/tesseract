@@ -1,0 +1,84 @@
+/*
+ * Structural and derived tokens.
+ *
+ * Palette files (resources/css/palettes/*.css) set base values on :root
+ * and .dark. Everything here is computed from those values, so it is
+ * declared once and follows the active palette and appearance.
+ */
+
+:root {
+    /* Typography */
+    --typeface-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+    --typeface-heading: var(--typeface-sans);
+    --typeface-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Shape */
+    --radius: 0.625rem;
+
+    /* Destructive follows the error status */
+    --destructive: var(--status-error);
+    --destructive-foreground: var(--status-error);
+
+    /* Status surfaces: 16% fill, 42% border keep 3:1 against cards */
+    --status-ok-bg: color-mix(in oklab, var(--status-ok) 16%, transparent);
+    --status-ok-border: color-mix(in oklab, var(--status-ok) 42%, transparent);
+    --status-live-bg: color-mix(in oklab, var(--status-live) 16%, transparent);
+    --status-live-border: color-mix(
+        in oklab,
+        var(--status-live) 42%,
+        transparent
+    );
+    --status-warn-bg: color-mix(in oklab, var(--status-warn) 16%, transparent);
+    --status-warn-border: color-mix(
+        in oklab,
+        var(--status-warn) 42%,
+        transparent
+    );
+    --status-error-bg: color-mix(
+        in oklab,
+        var(--status-error) 16%,
+        transparent
+    );
+    --status-error-border: color-mix(
+        in oklab,
+        var(--status-error) 42%,
+        transparent
+    );
+    --status-info-bg: color-mix(in oklab, var(--status-info) 16%, transparent);
+    --status-info-border: color-mix(
+        in oklab,
+        var(--status-info) 42%,
+        transparent
+    );
+    --status-muted-bg: color-mix(
+        in oklab,
+        var(--status-muted) 14%,
+        transparent
+    );
+    --status-muted-border: color-mix(
+        in oklab,
+        var(--status-muted) 36%,
+        transparent
+    );
+
+    /* Interaction */
+    --interaction-hover: color-mix(in oklab, var(--foreground) 8%, transparent);
+    --interaction-active: color-mix(
+        in oklab,
+        var(--foreground) 12%,
+        transparent
+    );
+    --overlay-scrim: color-mix(
+        in oklab,
+        var(--palette-slate-950) 60%,
+        transparent
+    );
+
+    /* Components: only what needs its own value */
+    --video-overlay: color-mix(
+        in oklab,
+        var(--palette-slate-950) 72%,
+        transparent
+    );
+    --video-overlay-foreground: var(--palette-white);
+}

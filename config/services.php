@@ -6,6 +6,15 @@ return [
 
     'mediamtx' => [
         'webrtc_url' => env('MEDIA_WEBRTC_URL', 'http://localhost:8889'),
+
+        /*
+         * Cameras published by MediaMTX. Paths must match mediamtx.yml;
+         * sources are injected there through MTX_PATHS_*_SOURCE.
+         */
+        'cameras' => [
+            ['slug' => 'tars', 'name' => 'TARS', 'main_path' => 'tars', 'sub_path' => 'tars-sub'],
+            ['slug' => 'case', 'name' => 'CASE', 'main_path' => 'case', 'sub_path' => 'case-sub'],
+        ],
     ],
 
     /*

@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import {
     useEffect,
     useReducer,
@@ -5,39 +6,34 @@ import {
     useState,
     useSyncExternalStore,
 } from 'react';
-import { Button } from '@/components/ui/button';
 import { WhepSession } from '@/lib/whep-client';
+import type { StreamStatus } from '@/types';
 
-type CameraPlayerProps = {
-    name: string;
-    mediaUrl: string;
-    path: string;
-};
-
-type Status = 'connecting' | 'playing' | 'paused' | 'retrying' | 'unsupported';
-const statusLabels: Record<Status, string> = {
-    connecting: 'Conectando…',
-    playing: 'En vivo',
-    paused: 'Pausado',
-    retrying: 'Reconectando…',
-    unsupported: 'WebRTC no está disponible en este navegador',
-};
+const FRAME_TIMEOUT_MS = 20000;
+const MAX_RETRY_DELAY_MS = 15000;
 
 const subscribeToCapabilities = () => () => {};
 const getCapabilities = () =>
     window.isSecureContext && 'RTCPeerConnection' in window;
 const getServerCapabilities = (): boolean | null => null;
 
-export default function CameraPlayer({
-    name,
-    mediaUrl,
-    path,
-}: CameraPlayerProps) {
+export type WhepStream = {
+    videoRef: RefObject<HTMLVideoElement | null>;
+    status: StreamStatus;
+    reconnect: () => void;
+};
+
+/**
+ * Plays a MediaMTX path over WHEP into the returned video element.
+ *
+ * Retries with exponential backoff, and treats a stream that stops
+ * delivering frames while visible as failed. Changing the path closes the
+ * current session and opens a new one.
+ */
+export function useWhepStream(mediaUrl: string, path: string): WhepStream {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const [quality, setQuality] = useState<'main' | 'sub'>('main');
-    const [attempt, reconnect] = useReducer((value: number) => value + 1, 0);
-    const [status, setStatus] = useState<Status>('connecting');
-    const streamPath = quality === 'main' ? path : `${path}-sub`;
+    const [attempt, retry] = useReducer((value: number) => value + 1, 0);
+    const [status, setStatus] = useState<StreamStatus>('connecting');
     const supported = useSyncExternalStore(
         subscribeToCapabilities,
         getCapabilities,
@@ -57,6 +53,8 @@ export default function CameraPlayer({
         const supportsFrames =
             typeof video.requestVideoFrameCallback === 'function';
 
+        setStatus('connecting');
+
         const fail = () => {
             if (disposed || failed) return;
             failed = true;
@@ -64,11 +62,8 @@ export default function CameraPlayer({
             session?.close();
             video.srcObject = null;
             retryTimer = setTimeout(
-                () => {
-                    setStatus('connecting');
-                    reconnect();
-                },
-                Math.min(2000 * 2 ** Math.min(attempt, 3), 15000),
+                retry,
+                Math.min(2000 * 2 ** Math.min(attempt, 3), MAX_RETRY_DELAY_MS),
             );
         };
         const frame = () => {
@@ -96,12 +91,12 @@ export default function CameraPlayer({
                 (video.paused && video.readyState >= 2)
             )
                 return;
-            if (performance.now() - lastFrame > 20000) fail();
+            if (performance.now() - lastFrame > FRAME_TIMEOUT_MS) fail();
         }, 2000);
 
         try {
             const endpoint = new URL(
-                `${streamPath}/whep`,
+                `${path}/whep`,
                 `${mediaUrl.replace(/\/$/, '')}/`,
             );
             session = new WhepSession(endpoint, {
@@ -132,59 +127,11 @@ export default function CameraPlayer({
             session?.close();
             video.srcObject = null;
         };
-    }, [attempt, mediaUrl, streamPath, supported]);
+    }, [attempt, mediaUrl, path, supported]);
 
-    return (
-        <section
-            aria-label={`Cámara ${name}`}
-            className="overflow-hidden rounded-xl border border-border bg-card"
-        >
-            <div className="flex flex-wrap items-center justify-between gap-3 p-4">
-                <h2 className="text-lg font-semibold">{name}</h2>
-                <p role="status" className="text-sm text-muted-foreground">
-                    {statusLabels[supported === false ? 'unsupported' : status]}
-                </p>
-            </div>
-            <video
-                ref={videoRef}
-                aria-label={`Video en vivo de ${name}`}
-                autoPlay
-                muted
-                playsInline
-                controls
-                className="aspect-video w-full bg-black object-contain"
-            />
-            <div className="flex flex-wrap items-center justify-between gap-3 p-4">
-                <label className="flex items-center gap-3 text-sm">
-                    Calidad
-                    <select
-                        aria-label={`Calidad de ${name}`}
-                        value={quality}
-                        onChange={(event) => {
-                            setStatus('connecting');
-                            setQuality(
-                                event.target.value === 'main' ? 'main' : 'sub',
-                            );
-                        }}
-                        className="min-h-11 rounded-md border border-input bg-background px-3 text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                    >
-                        <option value="main">Principal · 4K</option>
-                        <option value="sub">Secundario · 360p</option>
-                    </select>
-                </label>
-                <Button
-                    type="button"
-                    variant="outline"
-                    className="min-h-11"
-                    onClick={() => {
-                        setStatus('connecting');
-                        reconnect();
-                    }}
-                    disabled={supported === false}
-                >
-                    Reconectar {name}
-                </Button>
-            </div>
-        </section>
-    );
+    return {
+        videoRef,
+        status: supported === false ? 'unsupported' : status,
+        reconnect: retry,
+    };
 }

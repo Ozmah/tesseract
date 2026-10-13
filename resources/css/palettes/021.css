@@ -1,0 +1,131 @@
+/*
+ * Palette 021: soft neutrals, sunny yellows and cool slate.
+ *
+ * Source colors:
+ *   Deep Daigi White  #E9E7E6  oklch(0.9292 0.0026 48.72)
+ *   Sunlit Platinum   #E1DFDB  oklch(0.9041 0.0058 84.57)
+ *   Mango Marmalade   #FFD369  oklch(0.8845 0.1333 86.89)
+ *   Cheddar Fondue    #F5BE3D  oklch(0.8300 0.1513 84.33)
+ *   Midnight Slate    #333B4C  oklch(0.3522 0.0317 265.11)
+ *   Slate Shadow      #1F2634  oklch(0.2684 0.0281 263.92)
+ *
+ * The slate scale is derived on hue 264 between the two source slates.
+ * Yellow is reserved for interaction (primary, focus); status colors use
+ * their own hues so "warning" never reads as "action". Yellow as text
+ * uses --highlight, which darkens to amber on light surfaces.
+ *
+ * Only palette values live here. Derived tokens (status surfaces,
+ * interaction states, component tokens) are computed in tokens.css,
+ * so swapping this file swaps the whole palette.
+ */
+
+:root {
+    /* Primitives */
+    --palette-slate-950: oklch(0.205 0.022 264);
+    --palette-slate-900: oklch(0.2684 0.0281 263.92);
+    --palette-slate-850: oklch(0.31 0.03 264);
+    --palette-slate-800: oklch(0.3522 0.0317 265.11);
+    --palette-slate-700: oklch(0.44 0.03 264);
+    --palette-slate-600: oklch(0.53 0.028 264);
+    --palette-slate-500: oklch(0.62 0.025 264);
+    --palette-slate-400: oklch(0.73 0.02 264);
+    --palette-slate-300: oklch(0.8 0.014 264);
+    --palette-slate-200: oklch(0.87 0.008 264);
+    --palette-white: oklch(0.9292 0.0026 48.72);
+    --palette-platinum: oklch(0.9041 0.0058 84.57);
+    --palette-paper: oklch(0.975 0.003 60);
+    --palette-paper-raised: oklch(0.99 0.002 60);
+    --palette-mango: oklch(0.8845 0.1333 86.89);
+    --palette-cheddar: oklch(0.83 0.1513 84.33);
+    --palette-amber: oklch(0.55 0.11 70);
+
+    /* Light appearance (secondary) */
+    --background: var(--palette-paper);
+    --foreground: var(--palette-slate-900);
+    --card: var(--palette-paper-raised);
+    --card-foreground: var(--palette-slate-900);
+    --popover: var(--palette-paper-raised);
+    --popover-foreground: var(--palette-slate-900);
+    --primary: var(--palette-cheddar);
+    --primary-foreground: var(--palette-slate-900);
+    --secondary: var(--palette-platinum);
+    --secondary-foreground: var(--palette-slate-900);
+    --muted: var(--palette-platinum);
+    --muted-foreground: var(--palette-slate-700);
+    --accent: var(--palette-platinum);
+    --accent-foreground: var(--palette-slate-900);
+    --border: var(--palette-slate-200);
+    --input: var(--palette-slate-500);
+    --ring: var(--palette-amber);
+    --highlight: var(--palette-amber);
+
+    --sidebar: var(--palette-white);
+    --sidebar-foreground: var(--palette-slate-900);
+    --sidebar-primary: var(--palette-slate-900);
+    --sidebar-primary-foreground: var(--palette-cheddar);
+    --sidebar-accent: var(--palette-platinum);
+    --sidebar-accent-foreground: var(--palette-slate-900);
+    --sidebar-border: var(--palette-slate-200);
+    --sidebar-ring: var(--palette-amber);
+
+    --status-ok: oklch(0.5 0.13 152);
+    --status-live: oklch(0.55 0.2 0);
+    --status-warn: oklch(0.55 0.13 50);
+    --status-error: oklch(0.53 0.19 27);
+    --status-info: oklch(0.5 0.12 245);
+    --status-muted: var(--palette-slate-600);
+
+    --chart-1: var(--palette-amber);
+    --chart-2: var(--status-info);
+    --chart-3: var(--status-ok);
+    --chart-4: var(--status-warn);
+    --chart-5: var(--palette-slate-500);
+
+    --video-surface: var(--palette-slate-950);
+}
+
+.dark {
+    /* Dark appearance (primary) */
+    --background: var(--palette-slate-950);
+    --foreground: var(--palette-white);
+    --card: var(--palette-slate-900);
+    --card-foreground: var(--palette-white);
+    --popover: var(--palette-slate-850);
+    --popover-foreground: var(--palette-white);
+    --primary: var(--palette-cheddar);
+    --primary-foreground: var(--palette-slate-900);
+    --secondary: var(--palette-slate-800);
+    --secondary-foreground: var(--palette-white);
+    --muted: var(--palette-slate-800);
+    --muted-foreground: var(--palette-slate-400);
+    --accent: var(--palette-slate-800);
+    --accent-foreground: var(--palette-white);
+    --border: var(--palette-slate-800);
+    --input: var(--palette-slate-500);
+    --ring: var(--palette-mango);
+    --highlight: var(--palette-cheddar);
+
+    --sidebar: var(--palette-slate-900);
+    --sidebar-foreground: var(--palette-white);
+    --sidebar-primary: var(--palette-cheddar);
+    --sidebar-primary-foreground: var(--palette-slate-900);
+    --sidebar-accent: var(--palette-slate-800);
+    --sidebar-accent-foreground: var(--palette-white);
+    --sidebar-border: var(--palette-slate-800);
+    --sidebar-ring: var(--palette-mango);
+
+    --status-ok: oklch(0.76 0.15 152);
+    --status-live: oklch(0.7 0.19 0);
+    --status-warn: oklch(0.76 0.15 55);
+    --status-error: oklch(0.68 0.19 25);
+    --status-info: oklch(0.74 0.11 240);
+    --status-muted: var(--palette-slate-400);
+
+    --chart-1: var(--palette-cheddar);
+    --chart-2: var(--status-info);
+    --chart-3: var(--status-ok);
+    --chart-4: var(--status-warn);
+    --chart-5: var(--palette-slate-400);
+
+    --video-surface: oklch(0.13 0.015 264);
+}

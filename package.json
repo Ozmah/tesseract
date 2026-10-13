@@ -16,7 +16,7 @@
         "glados": "bun run env:check && bun run env:check:media && bun run secrets:scan && bun run secrets:scan:media && bun run test:player && bun run tooling composer glados",
         "shodan": "bun run test:player && bun run tooling composer test:app",
         "shodan:ci": "bun run env:test && bun run test:player && composer test",
-        "test:player": "bun --no-env-file test tests/Browser/whep-client.test.ts",
+        "test:player": "bun --no-env-file test tests/Browser/whep-client.test.ts tests/Browser/digital-zoom.test.ts",
         "test:browser": "bun run tooling composer test:browser",
         "env:host": "bun --no-env-file node_modules/varlock/bin/cli.js run --path .env.bootstrap.schema --inject vars --",
         "env:up": "bun run env:media bun run env:host docker compose up -d --no-build --pull never --wait --wait-timeout 60",

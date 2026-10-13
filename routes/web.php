@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Actions\ListCameras;
+use App\Http\Controllers\CameraController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEmailResetNotificationController;
@@ -15,9 +17,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('viewer', [
+Route::get('/', [CameraController::class, 'index'])->name('home');
+Route::get('cameras/{camera}', [CameraController::class, 'show'])->name('cameras.show');
+
+Route::get('aperture', fn (ListCameras $cameras) => Inertia::render('aperture', [
     'mediaUrl' => config('services.mediamtx.webrtc_url'),
-]))->name('home');
+    'cameras' => $cameras->handle(),
+]))->name('aperture');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');
