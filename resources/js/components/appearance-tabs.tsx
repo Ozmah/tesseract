@@ -1,9 +1,9 @@
-import type { LucideIcon } from 'lucide-react';
-import { Monitor, Moon, Sun } from 'lucide-react';
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
+import { MonitorIcon, MoonIcon, SunIcon } from '@phosphor-icons/react';
+import { cn } from 'cn';
 import type { HTMLAttributes } from 'react';
 import type { Appearance } from '@/hooks/use-appearance';
 import { useAppearance } from '@/hooks/use-appearance';
-import { cn } from '@/lib/utils';
 
 export default function AppearanceToggleTab({
     className = '',
@@ -11,10 +11,10 @@ export default function AppearanceToggleTab({
 }: HTMLAttributes<HTMLDivElement>) {
     const { appearance, updateAppearance } = useAppearance();
 
-    const tabs: { value: Appearance; icon: LucideIcon; label: string }[] = [
-        { value: 'light', icon: Sun, label: 'Light' },
-        { value: 'dark', icon: Moon, label: 'Dark' },
-        { value: 'system', icon: Monitor, label: 'System' },
+    const tabs: { value: Appearance; icon: PhosphorIcon; label: string }[] = [
+        { value: 'light', icon: SunIcon, label: 'Light' },
+        { value: 'dark', icon: MoonIcon, label: 'Dark' },
+        { value: 'system', icon: MonitorIcon, label: 'System' },
     ];
 
     return (

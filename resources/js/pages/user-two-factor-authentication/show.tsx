@@ -1,5 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheckIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
 import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
@@ -94,7 +94,7 @@ export default function TwoFactor({
                                     <Button
                                         onClick={() => setShowSetupModal(true)}
                                     >
-                                        <ShieldCheck />
+                                        <ShieldCheckIcon />
                                         Continue setup
                                     </Button>
                                 ) : (

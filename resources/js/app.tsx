@@ -22,7 +22,7 @@ void createInertiaApp({
 
         root.render(
             <StrictMode>
-                <TooltipProvider delayDuration={0}>
+                <TooltipProvider>
                     <App {...props} />
                     <Toaster />
                 </TooltipProvider>

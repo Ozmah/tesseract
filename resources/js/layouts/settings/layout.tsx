@@ -1,10 +1,11 @@
 import { Link } from '@inertiajs/react';
+import { cn } from 'cn';
 import type { PropsWithChildren } from 'react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
-import { cn, toUrl } from '@/lib/utils';
+import { toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editPassword } from '@/routes/password';
 import { show as showTwoFactor } from '@/routes/two-factor';
@@ -66,17 +67,14 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 key={`${toUrl(item.href)}-${index}`}
                                 size="sm"
                                 variant="ghost"
-                                asChild
+                                nativeButton={false}
+                                render={<Link href={item.href} />}
                                 className={cn('w-full justify-start', {
                                     'bg-muted': isCurrentOrParentUrl(item.href),
                                 })}
                             >
-                                <Link href={item.href}>
-                                    {item.icon && (
-                                        <item.icon className="h-4 w-4" />
-                                    )}
-                                    {item.title}
-                                </Link>
+                                {item.icon && <item.icon className="h-4 w-4" />}
+                                {item.title}
                             </Button>
                         ))}
                     </nav>
